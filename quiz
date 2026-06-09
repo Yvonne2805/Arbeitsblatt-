@@ -1,1 +1,911 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Das Rondo – Quiz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --ink: #1a1a2e;
+    --paper: #faf7f2;
+    --gold: #c9952a;
+    --gold-light: #f0d898;
+    --gold-bg: #fff8e6;
+    --success: #2d7a4f;
+    --success-bg: #edfaf3;
+    --error: #c0392b;
+    --error-bg: #fdf0f0;
+    --neutral: #6b7280;
+    --border: #d6cfc4;
+    --radius: 12px;
+    --shadow: rgba(26,26,46,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: #fff;
+    padding: 32px 40px 26px;
+    border-bottom: 4px solid var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .header-clef { font-size: 72px; line-height: 1; color: var(--gold); flex-shrink: 0; }
+  .header-text h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 900; color: #fff; line-height: 1.1; }
+  .header-text p { font-size: 0.85rem; color: var(--gold-light); margin-top: 5px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    background: var(--ink);
+    padding: 14px 40px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    color: var(--gold-light);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .progress-track {
+    background: rgba(255,255,255,0.12);
+    border-radius: 99px;
+    height: 7px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: #fff;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: 0 2px 16px var(--shadow);
+    padding: 32px 32px 28px;
+    margin-bottom: 28px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .question-card.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .question-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .question-num {
+    background: var(--ink);
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .question-type {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--neutral);
+    background: var(--paper);
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 22px;
+    color: var(--ink);
+  }
+
+  /* MULTIPLE CHOICE */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 18px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    touch-action: manipulation;
+    background: #fff;
+  }
+  .option:hover { border-color: var(--gold); background: var(--gold-bg); }
+  .option.selected { border-color: var(--gold); background: var(--gold-bg); }
+  .option.correct { border-color: var(--success); background: var(--success-bg); }
+  .option.wrong { border-color: var(--error); background: var(--error-bg); }
+  .option.show-correct { border-color: var(--success); background: var(--success-bg); }
+  .option:active { transform: scale(0.98); }
+  .option-letter {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--border);
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .option.selected .option-letter { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+  .option.correct .option-letter { background: var(--success); border-color: var(--success); color: #fff; }
+  .option.wrong .option-letter { background: var(--error); border-color: var(--error); color: #fff; }
+  .option.show-correct .option-letter { background: var(--success); border-color: var(--success); color: #fff; }
+  .option-text { font-size: 0.97rem; line-height: 1.4; }
+
+  /* WAHR/FALSCH */
+  .tf-options {
+    display: flex;
+    gap: 12px;
+  }
+  .tf-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    touch-action: manipulation;
+  }
+  .tf-btn:hover { border-color: var(--gold); background: var(--gold-bg); }
+  .tf-btn.selected { border-color: var(--gold); background: var(--gold-bg); color: var(--ink); }
+  .tf-btn.correct { border-color: var(--success); background: var(--success-bg); color: var(--success); }
+  .tf-btn.wrong { border-color: var(--error); background: var(--error-bg); color: var(--error); }
+  .tf-btn.show-correct { border-color: var(--success); background: var(--success-bg); color: var(--success); }
+
+  /* LÜCKENTEXT */
+  .fill-text {
+    font-size: 1.05rem;
+    line-height: 2.4;
+    margin-bottom: 16px;
+  }
+  .fill-input {
+    border: none;
+    border-bottom: 2.5px solid var(--ink);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--ink);
+    padding: 2px 8px;
+    min-width: 100px;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .fill-input:focus { border-color: var(--gold); }
+  .fill-input.correct { border-color: var(--success); background: var(--success-bg); color: var(--success); border-radius: 4px; }
+  .fill-input.wrong { border-color: var(--error); background: var(--error-bg); color: var(--error); border-radius: 4px; }
+
+  /* SORTIEREN */
+  .sort-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .sort-source {
+    background: var(--paper);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .sort-source-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--neutral);
+    margin-bottom: 8px;
+  }
+  .sort-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    box-shadow: 0 2px 6px var(--shadow);
+    touch-action: manipulation;
+  }
+  .sort-chip:hover { transform: scale(1.1); }
+  .sort-chip.chip-selected { border-color: var(--gold); transform: scale(1.12); box-shadow: 0 0 0 3px var(--gold-light); }
+  .sort-chip.chip-used { opacity: 0.3; pointer-events: none; }
+
+  .sort-drop {
+    min-height: 60px;
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+  .sort-drop:hover { border-color: var(--gold); background: var(--gold-bg); }
+  .sort-drop-placeholder {
+    color: #bbb;
+    font-size: 0.88rem;
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .placed-chip {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 2px 6px var(--shadow);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .placed-chip .rm { position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; border-radius: 50%; background: #fff; color: #c00; font-size: 11px; display: none; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .placed-chip:hover .rm { display: flex; }
+  .sort-arrow { color: #bbb; font-size: 1rem; flex-shrink: 0; }
+
+  /* FEEDBACK */
+  .q-feedback {
+    margin-top: 14px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: none;
+    line-height: 1.5;
+  }
+  .q-feedback.correct { background: var(--success-bg); color: var(--success); border: 1.5px solid var(--success); display: block; }
+  .q-feedback.wrong { background: var(--error-bg); color: var(--error); border: 1.5px solid var(--error); display: block; }
+
+  /* BUTTONS */
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    padding: 12px 26px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    touch-action: manipulation;
+    letter-spacing: 0.02em;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-check { background: var(--gold); color: var(--ink); }
+  .btn-check:hover { background: #b8841e; }
+  .btn-next { background: var(--ink); color: var(--gold); }
+  .btn-next:hover { background: #2d2d4e; }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+  /* SCORE SCREEN */
+  #score-screen {
+    display: none;
+    text-align: center;
+    padding: 48px 24px;
+  }
+  .score-trophy { font-size: 5rem; margin-bottom: 16px; }
+  .score-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; margin-bottom: 8px; color: var(--ink); }
+  .score-subtitle { font-size: 1rem; color: var(--neutral); margin-bottom: 32px; }
+  .score-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 8px solid var(--gold);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 32px;
+    background: #fff;
+    box-shadow: 0 4px 24px var(--shadow);
+  }
+  .score-number { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 900; color: var(--ink); line-height: 1; }
+  .score-label { font-size: 0.78rem; font-weight: 600; color: var(--neutral); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; }
+  .score-breakdown {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    text-align: left;
+  }
+  .score-breakdown h3 { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--neutral); margin-bottom: 14px; }
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .score-row:last-child { border-bottom: none; }
+  .score-icon { font-size: 1rem; flex-shrink: 0; width: 20px; text-align: center; }
+  .score-q { flex: 1; }
+  .score-result { font-weight: 700; }
+  .score-result.ok { color: var(--success); }
+  .score-result.bad { color: var(--error); }
+
+  @media (max-width: 600px) {
+    header { padding: 22px 18px 18px; gap: 12px; }
+    .header-clef { font-size: 50px; }
+    .header-text h1 { font-size: 1.6rem; }
+    .progress-bar-wrap { padding: 10px 18px 14px; }
+    main { padding: 24px 14px 60px; }
+    .question-card { padding: 22px 18px 18px; }
+    .question-text { font-size: 1.05rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-clef">𝄞</div>
+  <div class="header-text">
+    <h1>Rondo-Quiz</h1>
+    <p>Teste dein Wissen · Klasse 5</p>
+  </div>
+</header>
+
+<div class="progress-bar-wrap">
+  <div class="progress-info">
+    <span id="progress-label">Frage 1 von 20</span>
+    <span id="score-live">Punkte: 0</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<main>
+  <div id="quiz-container">
+    <!-- Questions inserted by JS -->
+  </div>
+
+  <div id="score-screen">
+    <div class="score-trophy" id="score-trophy">🎼</div>
+    <div class="score-title" id="score-title">Quiz abgeschlossen!</div>
+    <div class="score-subtitle" id="score-subtitle"></div>
+    <div class="score-circle">
+      <div class="score-number" id="score-num">0</div>
+      <div class="score-label">von 20 Punkten</div>
+    </div>
+    <div class="score-breakdown">
+      <h3>Deine Antworten</h3>
+      <div id="score-rows"></div>
+    </div>
+    <button class="btn btn-next" onclick="restartQuiz()">↺ Nochmal versuchen</button>
+  </div>
+</main>
+
+<script>
+// ══════════════════════════════
+// QUIZ DATA
+// ══════════════════════════════
+const RONDO_COLORS = { A:'#c0392b', B:'#1a6b8a', C:'#2d7a4f', D:'#7b4ea6' };
+
+const questions = [
+  // 1 - MC
+  {
+    type: 'mc',
+    text: 'Was ist ein Rondo?',
+    options: ['Ein Musikinstrument aus der Barockzeit', 'Eine besondere musikalische Form', 'Ein lateinisches Gebet', 'Eine Art Tanz aus Frankreich'],
+    correct: 1,
+    explanation: 'Richtig! Das Rondo ist eine besondere musikalische Form.'
+  },
+  // 2 - TF
+  {
+    type: 'tf',
+    text: 'Beim Rondo bleibt der Refrain immer gleich.',
+    correct: true,
+    explanation: 'Richtig! Der Refrain (Teil A) wiederholt sich immer unverändert.'
+  },
+  // 3 - MC
+  {
+    type: 'mc',
+    text: 'Wie nennt man die Zwischenteile im Rondo, die sich jedes Mal verändern?',
+    options: ['Refrains', 'Couplets', 'Strophen', 'Fugen'],
+    correct: 1,
+    explanation: 'Richtig! Die Zwischenteile heißen Couplets.'
+  },
+  // 4 - FILL
+  {
+    type: 'fill',
+    text: 'Das Grundprinzip des Rondos lautet: _____ – Couplet – _____ – Couplet – _____.',
+    blanks: ['Refrain', 'Refrain', 'Refrain'],
+    explanation: 'Der Refrain kehrt immer wieder zurück und wechselt sich mit den Couplets ab.'
+  },
+  // 5 - MC
+  {
+    type: 'mc',
+    text: 'Welches Muster hat das Kettenrondo?',
+    options: ['A – B – A – B – A', 'A – B – A – C – A – D – A', 'A – B – A – C – A – B – A', 'A – A – B – C – D'],
+    correct: 1,
+    explanation: 'Beim Kettenrondo folgen immer neue Couplets (B, C, D …) nach dem Refrain A.'
+  },
+  // 6 - TF
+  {
+    type: 'tf',
+    text: 'Beim Bogenrondo kehren die Couplets in umgekehrter Reihenfolge zurück.',
+    correct: true,
+    explanation: 'Richtig! Das Bogenrondo hat das Muster A–B–A–C–A–B–A. Die Couplets spiegeln sich.'
+  },
+  // 7 - MC
+  {
+    type: 'mc',
+    text: 'Welches Muster hat das Bogenrondo?',
+    options: ['A – B – C – B – A', 'A – B – A – C – A – D – A', 'A – B – A – C – A – B – A', 'A – A – B – A – C – A'],
+    correct: 2,
+    explanation: 'Das Bogenrondo: A–B–A–C–A–B–A. Es spiegelt sich um den mittleren Teil C.'
+  },
+  // 8 - SORT
+  {
+    type: 'sort',
+    text: 'Bringe die Teile in die richtige Reihenfolge für ein Kettenrondo:',
+    correct: ['A','B','A','C','A','D','A'],
+    pieces: ['A','B','C','D'],
+    explanation: 'Das Kettenrondo folgt dem Muster: A – B – A – C – A – D – A.'
+  },
+  // 9 - TF
+  {
+    type: 'tf',
+    text: 'Das Rondo entstand erst im 20. Jahrhundert.',
+    correct: false,
+    explanation: 'Falsch! Das Rondo ist eine sehr alte Form aus der Zeit des Barock und der Klassik (17./18. Jahrhundert).'
+  },
+  // 10 - MC
+  {
+    type: 'mc',
+    text: 'Welcher Komponist schrieb das „Te Deum", das als Eurovisionshymne bekannt wurde?',
+    options: ['Wolfgang Amadeus Mozart', 'Ludwig van Beethoven', 'Marc-Antoine Charpentier', 'Johann Sebastian Bach'],
+    correct: 2,
+    explanation: 'Marc-Antoine Charpentier schrieb das „Te Deum" um 1692.'
+  },
+  // 11 - FILL
+  {
+    type: 'fill',
+    text: 'Marc-Antoine Charpentier lebte von 1643 bis _____ in _____.',
+    blanks: ['1704', 'Frankreich'],
+    explanation: 'Charpentier lebte von 1643 bis 1704 in Frankreich und war Hofkomponist bei Ludwig XIV.'
+  },
+  // 12 - TF
+  {
+    type: 'tf',
+    text: 'Das „Te Deum" von Charpentier war ursprünglich ein Kirchenlied.',
+    correct: true,
+    explanation: 'Richtig! Das „Te Deum" ist ein lateinisches Kirchenlied zum Lob Gottes.'
+  },
+  // 13 - MC
+  {
+    type: 'mc',
+    text: 'Seit welchem Jahr erklingt das „Te Deum" als Eurovisionshymne?',
+    options: ['1920', '1954', '1968', '1980'],
+    correct: 1,
+    explanation: 'Seit 1954 wird das Präludium aus Charpentiers „Te Deum" als Europafanfare verwendet.'
+  },
+  // 14 - MC
+  {
+    type: 'mc',
+    text: 'Wie nennt man die Eurovisionshymne auch?',
+    options: ['Europamelodie', 'Europafanfare', 'Europarefrain', 'Eurovisionslied'],
+    correct: 1,
+    explanation: 'Die Melodie wird „Europafanfare" genannt.'
+  },
+  // 15 - SORT
+  {
+    type: 'sort',
+    text: 'Bringe die Teile in die richtige Reihenfolge für ein Bogenrondo:',
+    correct: ['A','B','A','C','A','B','A'],
+    pieces: ['A','B','C'],
+    explanation: 'Das Bogenrondo: A – B – A – C – A – B – A. Die Couplets spiegeln sich.'
+  },
+  // 16 - TF
+  {
+    type: 'tf',
+    text: 'Der Buchstabe „A" steht im Rondo immer für ein Couplet.',
+    correct: false,
+    explanation: 'Falsch! „A" steht für den Refrain. Die Couplets werden mit B, C, D bezeichnet.'
+  },
+  // 17 - MC
+  {
+    type: 'mc',
+    text: 'Wie klingt die Eurovisionshymne?',
+    options: ['Traurig und leise', 'Festlich und feierlich', 'Schnell und lustig', 'Ruhig und schläfrig'],
+    correct: 1,
+    explanation: 'Die Hymne klingt festlich, feierlich, majestätisch und kraftvoll.'
+  },
+  // 18 - FILL
+  {
+    type: 'fill',
+    text: 'Das „Te Deum" wurde für _____ und _____ geschrieben.',
+    blanks: ['Chor', 'Orchester'],
+    explanation: 'Charpentier schrieb das „Te Deum" für Chor und Orchester.'
+  },
+  // 19 - MC
+  {
+    type: 'mc',
+    text: 'Was unterscheidet das Kettenrondo vom Bogenrondo?',
+    options: [
+      'Beim Kettenrondo gibt es keinen Refrain',
+      'Beim Bogenrondo gibt es nur ein Couplet',
+      'Beim Kettenrondo kommen immer neue Couplets, beim Bogenrondo kehren sie zurück',
+      'Es gibt keinen Unterschied'
+    ],
+    correct: 2,
+    explanation: 'Beim Kettenrondo folgen immer neue Couplets (B, C, D). Beim Bogenrondo kehren die Couplets in umgekehrter Reihenfolge zurück.'
+  },
+  // 20 - TF
+  {
+    type: 'tf',
+    text: 'Das Rondoprinzip findet man auch in modernen Liedern mit Refrain und Strophen.',
+    correct: true,
+    explanation: 'Richtig! Auch moderne Lieder folgen dem Rondoprinzip: Der Refrain kehrt immer wieder zurück.'
+  }
+];
+
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+let currentQ = 0;
+let score = 0;
+let answers = new Array(questions.length).fill(null);
+let sortSelected = {};
+let sortPlaced = {};
+
+// ══════════════════════════════
+// BUILD QUESTIONS
+// ══════════════════════════════
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '';
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card' + (i === 0 ? ' active' : '');
+    card.id = 'q' + i;
+
+    const typeLabel = { mc: 'Multiple Choice', tf: 'Wahr oder Falsch', fill: 'Lückentext', sort: 'Rondo bauen' }[q.type];
+
+    let innerHTML = `
+      <div class="question-meta">
+        <span class="question-num">Frage ${i+1}</span>
+        <span class="question-type">${typeLabel}</span>
+      </div>
+      <div class="question-text">${q.text}</div>
+    `;
+
+    if (q.type === 'mc') {
+      innerHTML += `<div class="options">`;
+      const letters = ['A','B','C','D'];
+      q.options.forEach((opt, oi) => {
+        innerHTML += `<div class="option" id="opt-${i}-${oi}" onclick="selectOption(${i},${oi})">
+          <div class="option-letter">${letters[oi]}</div>
+          <div class="option-text">${opt}</div>
+        </div>`;
+      });
+      innerHTML += `</div>`;
+    } else if (q.type === 'tf') {
+      innerHTML += `<div class="tf-options">
+        <button class="tf-btn" id="tf-${i}-true" onclick="selectTF(${i},true)">✓ Wahr</button>
+        <button class="tf-btn" id="tf-${i}-false" onclick="selectTF(${i},false)">✕ Falsch</button>
+      </div>`;
+    } else if (q.type === 'fill') {
+      let fillHTML = q.text;
+      q.blanks.forEach((_, bi) => {
+        const w = Math.max(80, q.blanks[bi].length * 11 + 20);
+        fillHTML = fillHTML.replace('_____', `<input class="fill-input" id="fill-${i}-${bi}" style="min-width:${w}px" placeholder="?" />`);
+      });
+      innerHTML += `<div class="fill-text">${fillHTML}</div>`;
+    } else if (q.type === 'sort') {
+      sortSelected[i] = null;
+      sortPlaced[i] = [];
+      innerHTML += `
+        <div class="sort-source">
+          <div class="sort-source-label">Bausteine – tippe einen an:</div>
+          <div class="sort-items" id="sort-src-${i}">
+            ${q.pieces.map(l => `<div class="sort-chip" id="sortchip-${i}-${l}" style="background:${RONDO_COLORS[l]}" onclick="selectSortChip(${i},'${l}')">${l}</div>`).join('')}
+          </div>
+        </div>
+        <div class="sort-drop" id="sort-drop-${i}" onclick="placeSortChip(${i})">
+          <span class="sort-drop-placeholder" id="sort-ph-${i}">Hier tippen zum Platzieren</span>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:10px;font-size:0.82rem;padding:7px 14px;" onclick="clearSort(${i})">✕ Leeren</button>
+      `;
+    }
+
+    innerHTML += `<div class="q-feedback" id="fb-${i}"></div>`;
+    innerHTML += `<div class="btn-row">
+      <button class="btn btn-check" onclick="checkAnswer(${i})">✓ Überprüfen</button>
+      ${i < questions.length-1 ? `<button class="btn btn-next" id="next-${i}" style="display:none" onclick="nextQuestion(${i})">Weiter →</button>` : `<button class="btn btn-next" id="next-${i}" style="display:none" onclick="showScore()">Ergebnis anzeigen 🎉</button>`}
+    </div>`;
+
+    card.innerHTML = innerHTML;
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+// ══════════════════════════════
+// INTERACTION
+// ══════════════════════════════
+function selectOption(qi, oi) {
+  if (answers[qi] !== null) return;
+  document.querySelectorAll(`[id^="opt-${qi}-"]`).forEach(el => el.classList.remove('selected'));
+  document.getElementById(`opt-${qi}-${oi}`).classList.add('selected');
+  answers[qi] = oi;
+}
+
+function selectTF(qi, val) {
+  if (answers[qi] !== null) return;
+  document.getElementById(`tf-${qi}-true`).classList.remove('selected');
+  document.getElementById(`tf-${qi}-false`).classList.remove('selected');
+  document.getElementById(`tf-${qi}-${val}`).classList.add('selected');
+  answers[qi] = val;
+}
+
+function selectSortChip(qi, letter) {
+  if (sortSelected[qi] === letter) { sortSelected[qi] = null; document.querySelectorAll(`[id^="sortchip-${qi}-"]`).forEach(el => el.classList.remove('chip-selected')); return; }
+  document.querySelectorAll(`[id^="sortchip-${qi}-"]`).forEach(el => el.classList.remove('chip-selected'));
+  sortSelected[qi] = letter;
+  const el = document.getElementById(`sortchip-${qi}-${letter}`);
+  if (el) el.classList.add('chip-selected');
+}
+
+function placeSortChip(qi) {
+  const letter = sortSelected[qi];
+  if (!letter) return;
+  sortPlaced[qi].push(letter);
+  renderSortDrop(qi);
+  sortSelected[qi] = null;
+  document.querySelectorAll(`[id^="sortchip-${qi}-"]`).forEach(el => el.classList.remove('chip-selected'));
+}
+
+function removeSortChip(qi, idx) {
+  sortPlaced[qi].splice(idx, 1);
+  renderSortDrop(qi);
+}
+
+function renderSortDrop(qi) {
+  const drop = document.getElementById(`sort-drop-${qi}`);
+  const ph = document.getElementById(`sort-ph-${qi}`);
+  drop.querySelectorAll('.placed-chip,.sort-arrow').forEach(el => el.remove());
+  ph.style.display = sortPlaced[qi].length === 0 ? 'block' : 'none';
+  sortPlaced[qi].forEach((l, idx) => {
+    if (idx > 0) {
+      const arrow = document.createElement('span');
+      arrow.className = 'sort-arrow'; arrow.textContent = '→';
+      drop.appendChild(arrow);
+    }
+    const chip = document.createElement('div');
+    chip.className = 'placed-chip';
+    chip.style.background = RONDO_COLORS[l];
+    chip.textContent = l;
+    const rm = document.createElement('span');
+    rm.className = 'rm'; rm.textContent = '×';
+    rm.addEventListener('click', e => { e.stopPropagation(); removeSortChip(qi, idx); });
+    chip.appendChild(rm);
+    chip.addEventListener('click', () => removeSortChip(qi, idx));
+    drop.appendChild(chip);
+  });
+}
+
+function clearSort(qi) {
+  sortPlaced[qi] = [];
+  sortSelected[qi] = null;
+  document.querySelectorAll(`[id^="sortchip-${qi}-"]`).forEach(el => el.classList.remove('chip-selected','chip-used'));
+  renderSortDrop(qi);
+}
+
+// ══════════════════════════════
+// CHECK ANSWERS
+// ══════════════════════════════
+function checkAnswer(qi) {
+  const q = questions[qi];
+  const fb = document.getElementById(`fb-${qi}`);
+  const nextBtn = document.getElementById(`next-${qi}`);
+  let isCorrect = false;
+
+  if (q.type === 'mc') {
+    if (answers[qi] === null) { showHint(fb, 'Bitte wähle eine Antwort aus.'); return; }
+    isCorrect = answers[qi] === q.correct;
+    document.querySelectorAll(`[id^="opt-${qi}-"]`).forEach((el, oi) => {
+      el.onclick = null;
+      if (oi === q.correct) el.classList.add('show-correct');
+      else if (oi === answers[qi] && !isCorrect) el.classList.add('wrong');
+    });
+
+  } else if (q.type === 'tf') {
+    if (answers[qi] === null) { showHint(fb, 'Bitte wähle Wahr oder Falsch.'); return; }
+    isCorrect = answers[qi] === q.correct;
+    document.getElementById(`tf-${qi}-true`).onclick = null;
+    document.getElementById(`tf-${qi}-false`).onclick = null;
+    document.getElementById(`tf-${qi}-${q.correct}`).classList.add('show-correct');
+    if (!isCorrect) document.getElementById(`tf-${qi}-${answers[qi]}`).classList.add('wrong');
+
+  } else if (q.type === 'fill') {
+    let allCorrect = true;
+    q.blanks.forEach((ans, bi) => {
+      const input = document.getElementById(`fill-${qi}-${bi}`);
+      const val = (input.value || '').trim().toLowerCase();
+      if (val === ans.toLowerCase()) {
+        input.classList.add('correct');
+      } else {
+        input.classList.add('wrong');
+        input.value = ans;
+        allCorrect = false;
+      }
+      input.readOnly = true;
+    });
+    isCorrect = allCorrect;
+
+  } else if (q.type === 'sort') {
+    if (sortPlaced[qi].length === 0) { showHint(fb, 'Platziere zuerst die Bausteine!'); return; }
+    if (sortPlaced[qi].length < q.correct.length) { showHint(fb, `Noch nicht fertig! Du brauchst ${q.correct.length} Teile.`); return; }
+    isCorrect = JSON.stringify(sortPlaced[qi]) === JSON.stringify(q.correct);
+  }
+
+  if (isCorrect) {
+    score++;
+    document.getElementById('score-live').textContent = 'Punkte: ' + score;
+    fb.className = 'q-feedback correct';
+    fb.textContent = '✓ ' + q.explanation;
+    answers[qi] = 'correct';
+  } else {
+    fb.className = 'q-feedback wrong';
+    fb.textContent = '✗ ' + q.explanation;
+    if (answers[qi] === null) answers[qi] = 'wrong';
+    else answers[qi] = 'wrong-' + answers[qi];
+  }
+
+  nextBtn.style.display = 'inline-block';
+  document.querySelector(`#q${qi} .btn-check`).style.display = 'none';
+}
+
+function showHint(fb, msg) {
+  fb.className = 'q-feedback wrong';
+  fb.textContent = msg;
+  setTimeout(() => { fb.className = 'q-feedback'; fb.textContent = ''; }, 2000);
+}
+
+// ══════════════════════════════
+// NAVIGATION
+// ══════════════════════════════
+function nextQuestion(qi) {
+  document.getElementById('q' + qi).classList.remove('active');
+  currentQ = qi + 1;
+  document.getElementById('q' + currentQ).classList.add('active');
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress() {
+  const pct = (currentQ / questions.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `Frage ${currentQ + 1} von ${questions.length}`;
+}
+
+// ══════════════════════════════
+// SCORE SCREEN
+// ══════════════════════════════
+function showScore() {
+  document.getElementById('quiz-container').style.display = 'none';
+  document.getElementById('score-screen').style.display = 'block';
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-label').textContent = 'Quiz abgeschlossen!';
+
+  document.getElementById('score-num').textContent = score;
+
+  const pct = (score / questions.length) * 100;
+  let trophy, title, subtitle;
+  if (pct >= 90) { trophy = '🏆'; title = 'Ausgezeichnet!'; subtitle = 'Du bist ein echter Rondo-Experte!'; }
+  else if (pct >= 70) { trophy = '🥈'; title = 'Sehr gut!'; subtitle = 'Du kennst das Rondo schon sehr gut!'; }
+  else if (pct >= 50) { trophy = '🎼'; title = 'Gut gemacht!'; subtitle = 'Du hast schon viel gelernt – übe noch ein bisschen!'; }
+  else { trophy = '🎵'; title = 'Weiter üben!'; subtitle = 'Lies den Informationstext nochmal durch und versuche es erneut!'; }
+
+  document.getElementById('score-trophy').textContent = trophy;
+  document.getElementById('score-title').textContent = title;
+  document.getElementById('score-subtitle').textContent = subtitle + ` (${score} von ${questions.length} Punkten)`;
+
+  const rows = document.getElementById('score-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const ok = answers[i] === 'correct';
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    const shortQ = q.text.length > 55 ? q.text.substring(0, 55) + '…' : q.text;
+    row.innerHTML = `
+      <span class="score-icon">${ok ? '✓' : '✗'}</span>
+      <span class="score-q">${i+1}. ${shortQ}</span>
+      <span class="score-result ${ok?'ok':'bad'}">${ok ? 'Richtig' : 'Falsch'}</span>
+    `;
+    rows.appendChild(row);
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  currentQ = 0;
+  score = 0;
+  answers = new Array(questions.length).fill(null);
+  sortSelected = {};
+  sortPlaced = {};
+  document.getElementById('score-live').textContent = 'Punkte: 0';
+  document.getElementById('quiz-container').style.display = 'block';
+  document.getElementById('score-screen').style.display = 'none';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+buildQuiz();
+</script>
+</body>
+</html>
 

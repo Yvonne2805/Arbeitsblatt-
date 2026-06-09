@@ -1,1 +1,910 @@
-https://github.com/Yvonne2805/Arbeitsblatt-
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Das Rondo – Interaktives Arbeitsblatt</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap');
+
+  :root {
+    --ink: #1a1a2e;
+    --paper: #faf7f2;
+    --gold: #c9952a;
+    --gold-light: #f0d898;
+    --refrain: #c0392b;
+    --refrain-light: #f5c6c2;
+    --couplet-a: #1a6b8a;
+    --couplet-a-light: #c2e0ec;
+    --couplet-b: #2d7a4f;
+    --couplet-b-light: #c2e8d4;
+    --couplet-c: #7b4ea6;
+    --couplet-c-light: #e0c8f5;
+    --success: #2d7a4f;
+    --error: #c0392b;
+    --border: #d6cfc4;
+    --shadow: rgba(26,26,46,0.08);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 16px;
+    line-height: 1.7;
+    padding: 0 0 60px 0;
+  }
+
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 36px 40px 28px;
+    border-bottom: 4px solid var(--gold);
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+  }
+  .header-clef { font-size: 80px; line-height: 1; color: var(--gold); user-select: none; flex-shrink: 0; }
+  .header-text h1 { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 900; letter-spacing: 0.02em; color: #fff; line-height: 1.1; }
+  .header-text p { font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--gold-light); margin-top: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+  main { max-width: 860px; margin: 0 auto; padding: 40px 24px; display: flex; flex-direction: column; gap: 48px; }
+
+  .section { background: #fff; border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: 0 2px 12px var(--shadow); overflow: hidden; }
+  .section-header { background: var(--ink); color: #fff; padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+  .section-number { background: var(--gold); color: var(--ink); font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; }
+  .section-title { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .section-body { padding: 28px 28px 24px; }
+
+  .infotext { background: linear-gradient(135deg, #f9f6ef 0%, #fdf9f4 100%); border-left: 4px solid var(--gold); border-radius: 0 var(--radius) var(--radius) 0; padding: 20px 22px; }
+  .infotext p { margin-bottom: 0.9em; }
+  .infotext p:last-child { margin-bottom: 0; }
+  .highlight { color: var(--gold); font-weight: 600; }
+
+  .lueckentext-text { font-size: 1.05rem; line-height: 2.2; margin-bottom: 20px; }
+  .blank-input { display: inline-block; border: none; border-bottom: 2.5px solid var(--ink); background: transparent; font-family: 'Source Serif 4', serif; font-size: 1rem; color: var(--ink); padding: 2px 6px; min-width: 120px; width: auto; text-align: center; outline: none; transition: border-color 0.2s; cursor: pointer; }
+  .blank-input:focus { border-color: var(--gold); }
+  .blank-input.correct { border-color: var(--success); background: #edfaf3; color: var(--success); }
+  .blank-input.wrong { border-color: var(--error); background: #fdf0f0; color: var(--error); }
+  .blank-input.focused-blank { border-bottom: 2.5px solid var(--gold); background: #fff8e6; }
+
+  .wordbank { background: var(--paper); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 20px; }
+  .wordbank-label { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 10px; }
+  .wordbank-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--ink); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; padding: 5px 14px; border-radius: 20px; cursor: pointer; user-select: none; transition: background 0.15s, transform 0.1s; touch-action: manipulation; }
+  .chip:hover { background: var(--gold); color: var(--ink); }
+  .chip.selected { background: var(--gold); color: var(--ink); transform: scale(1.05); }
+  .chip.used { opacity: 0.35; pointer-events: none; text-decoration: line-through; }
+
+  /* RONDO BAUKASTEN */
+  .rondo-type-tabs { display: flex; margin-bottom: 24px; border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--border); }
+  .rondo-tab { flex: 1; padding: 12px 8px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; text-align: center; cursor: pointer; background: var(--paper); color: var(--ink); border: none; transition: background 0.2s; touch-action: manipulation; }
+  .rondo-tab.active { background: var(--ink); color: var(--gold); }
+
+  .rondo-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 14px 16px; background: var(--paper); border-radius: var(--radius); border: 1.5px solid var(--border); }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; }
+  .legend-dot { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-weight: 700; font-size: 0.8rem; color: #fff; }
+
+  .rondo-palette { margin-bottom: 20px; }
+  .palette-label { font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 10px; }
+  .palette-circles { display: flex; flex-wrap: wrap; gap: 10px; }
+  .palette-circle { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #fff; cursor: pointer; user-select: none; border: 3px solid transparent; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; touch-action: manipulation; box-shadow: 0 2px 6px var(--shadow); }
+  .palette-circle:hover { transform: scale(1.1); }
+  .palette-circle.selected-piece { border-color: var(--gold); transform: scale(1.12); box-shadow: 0 0 0 3px var(--gold-light); }
+
+  .rondo-drop-area { min-height: 80px; background: linear-gradient(135deg, var(--paper), #fff); border: 2px dashed var(--border); border-radius: var(--radius); display: flex; flex-wrap: wrap; gap: 8px; padding: 16px; align-items: center; margin-bottom: 16px; transition: border-color 0.2s; position: relative; cursor: pointer; }
+  .rondo-drop-area:hover { border-color: var(--gold); background: #fffbf0; }
+  .drop-placeholder { color: #bbb; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); pointer-events: none; white-space: nowrap; }
+  .placed-circle { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #fff; cursor: pointer; position: relative; box-shadow: 0 2px 8px var(--shadow); transition: transform 0.1s; touch-action: manipulation; flex-shrink: 0; }
+  .placed-circle:hover { transform: scale(1.08); }
+  .placed-circle .remove-btn { position: absolute; top: -4px; right: -4px; width: 18px; height: 18px; border-radius: 50%; background: #fff; color: #c00; font-size: 12px; display: none; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.2); line-height: 1; }
+  .placed-circle:hover .remove-btn { display: flex; }
+  .arrow-sep { color: #aaa; font-size: 1.2rem; margin: 0 2px; flex-shrink: 0; }
+
+  .rondo-feedback { padding: 14px 18px; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; display: none; margin-top: 4px; }
+  .rondo-feedback.correct { background: #edfaf3; color: var(--success); border: 1.5px solid var(--success); display: block; }
+  .rondo-feedback.wrong { background: #fdf0f0; color: var(--error); border: 1.5px solid var(--error); display: block; }
+  .rondo-feedback.hint { background: #fff8e0; color: #a06800; border: 1.5px solid var(--gold); display: block; }
+
+  /* EUROVISION */
+  .eurosong { background: linear-gradient(135deg, #1a1a2e 0%, #2a2a4e 100%); border-radius: var(--radius); padding: 24px 26px; color: #fff; position: relative; overflow: hidden; }
+  .eurosong::before { content: '★'; position: absolute; right: 24px; top: 16px; font-size: 2.5rem; color: var(--gold); opacity: 0.3; }
+  .eurosong h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold); margin-bottom: 12px; }
+  .eurosong p { font-size: 0.97rem; line-height: 1.75; color: #e8e0d5; margin-bottom: 0.8em; }
+  .eurosong p:last-child { margin-bottom: 0; }
+  .eurosong .highlight { color: var(--gold-light); }
+
+  /* VIDEO LINK */
+  .video-box { display: flex; align-items: center; gap: 16px; background: #fff; border: 2px solid var(--gold); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 24px; text-decoration: none; color: var(--ink); transition: box-shadow 0.2s, transform 0.15s; }
+  .video-box:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateY(-1px); }
+  .video-icon { font-size: 2.6rem; flex-shrink: 0; }
+  .video-text strong { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; display: block; margin-bottom: 3px; }
+  .video-text span { font-family: 'DM Sans', sans-serif; font-size: 0.84rem; color: #888; }
+
+  /* TASK BOX */
+  .task-box { background: #f5f0ff; border: 1.5px solid var(--couplet-c); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 22px; }
+  .task-box h4 { font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--couplet-c); margin-bottom: 10px; }
+  .task-box p { font-size: 0.95rem; margin-bottom: 8px; }
+  .task-box p:last-child { margin-bottom: 0; }
+
+  /* CHARAKTER CHIPS */
+  .charakter-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .char-chip { padding: 6px 16px; border-radius: 20px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: 2px solid var(--border); background: #fff; color: var(--ink); transition: all 0.15s; touch-action: manipulation; }
+  .char-chip:hover { border-color: var(--couplet-c); color: var(--couplet-c); }
+  .char-chip.selected-char { background: var(--couplet-c); color: #fff; border-color: var(--couplet-c); }
+
+  .char-result { margin-top: 12px; padding: 12px 16px; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 0.92rem; display: none; }
+  .char-result.visible { display: block; }
+  .char-result.correct { background: #edfaf3; color: var(--success); border: 1.5px solid var(--success); }
+  .char-result.partial { background: #fff8e0; color: #a06800; border: 1.5px solid var(--gold); }
+
+  /* STRUCTURE SUBTITLE */
+  .subsection-title { font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--ink); margin: 22px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--border); }
+
+  /* BUTTONS */
+  .btn { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; transition: background 0.15s, transform 0.1s; touch-action: manipulation; letter-spacing: 0.03em; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--ink); color: var(--gold); }
+  .btn-primary:hover { background: #2d2d4e; }
+  .btn-check { background: var(--gold); color: var(--ink); }
+  .btn-check:hover { background: #b8841e; }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-pdf { background: #c0392b; color: #fff; }
+  .btn-pdf:hover { background: #a93226; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+
+  .check-result { padding: 14px 18px; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 0.92rem; margin-top: 14px; display: none; }
+  .check-result.visible { display: block; }
+  .check-result.all-correct { background: #edfaf3; color: var(--success); border: 1.5px solid var(--success); }
+  .check-result.has-errors { background: #fdf0f0; color: var(--error); border: 1.5px solid var(--error); }
+
+  /* PDF LOADING */
+  #pdf-overlay { display: none; position: fixed; inset: 0; background: rgba(26,26,46,0.7); z-index: 9999; align-items: center; justify-content: center; }
+  #pdf-overlay.visible { display: flex; }
+  .pdf-spinner-box { background: #fff; border-radius: 14px; padding: 32px 40px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .pdf-spinner { width: 40px; height: 40px; border: 4px solid var(--gold-light); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .pdf-spinner-box p { font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); }
+
+  /* PDF OVERLAY */
+  #pdf-overlay { display: none; position: fixed; inset: 0; background: rgba(26,26,46,0.82); z-index: 9999; align-items: center; justify-content: center; }
+  #pdf-overlay.visible { display: flex; }
+  .pdf-spinner-box { background: #fff; border-radius: 14px; padding: 32px 40px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); min-width: 240px; }
+  .pdf-spinner { width: 44px; height: 44px; border: 4px solid var(--gold-light); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.9s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .pdf-spinner-box p { font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); margin: 0; }
+
+  @media (max-width: 600px) {
+    header { padding: 24px 18px 20px; gap: 14px; }
+    .header-clef { font-size: 54px; }
+    .header-text h1 { font-size: 1.7rem; }
+    main { padding: 24px 12px; gap: 32px; }
+    .section-body { padding: 18px 16px 16px; }
+    .palette-circle, .placed-circle { width: 44px; height: 44px; font-size: 0.88rem; }
+  }
+
+  @media print {
+    body { background: #fff !important; padding: 0; }
+    header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .btn-row, #pdf-overlay, .wordbank, .charakter-chips, .rondo-palette,
+    .rondo-type-tabs, .video-box { display: none !important; }
+    .section { box-shadow: none !important; break-inside: avoid; margin-bottom: 16px; }
+    .section-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .eurosong, .task-box, .infotext { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rondo-drop-area { border: 1.5px solid #ccc !important; min-height: 60px; }
+    .placed-circle { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .placed-circle .remove-btn { display: none !important; }
+    .blank-input.correct { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .blank-input.wrong { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rondo-feedback { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .check-result { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    main { gap: 20px; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+
+<div id="pdf-overlay">
+  <div class="pdf-spinner-box">
+    <div class="pdf-spinner"></div>
+    <p id="pdf-msg">PDF wird erstellt …</p>
+  </div>
+</div>
+
+<div id="printable">
+
+<header>
+  <div class="header-clef">𝄞</div>
+  <div class="header-text">
+    <h1>Das Rondo</h1>
+    <p>Interaktives Arbeitsblatt · Klasse 5</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- ══ TEIL 1: INFORMATIONSTEXT ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <span class="section-title">Informationstext: Was ist ein Rondo?</span>
+    </div>
+    <div class="section-body">
+      <div class="infotext">
+        <p>Das <span class="highlight">Rondo</span> ist eine besondere musikalische Form, die sich durch einen regelmäßigen Wechsel von Wiederholung und Abwechslung auszeichnet. Es besteht aus zwei verschiedenen Bausteinen: dem <span class="highlight">Refrain</span> und den <span class="highlight">Couplets</span>.</p>
+        <p>Der Refrain ist ein Abschnitt, der immer gleich bleibt und sich regelmäßig wiederholt. Er ist der bekannte und wiedererkennbare Teil des Stückes. Die Couplets hingegen sind die Zwischenteile – sie sind jedes Mal verschieden und bringen neue Abwechslung.</p>
+        <p>Das Grundprinzip des Rondos lautet: <span class="highlight">Refrain – Couplet – Refrain – Couplet – Refrain</span>. Dabei kann es unterschiedlich viele Couplets geben. Je nach Aufbau unterscheidet man verschiedene Rondo-Arten.</p>
+        <p>Beim <span class="highlight">Kettenrondo</span> wechseln sich Refrain und immer neue Couplets ab. Das Muster lautet: <em>A – B – A – C – A – D – A …</em> Das „A" steht für den Refrain, die Buchstaben B, C und D für verschiedene Couplets.</p>
+        <p>Beim <span class="highlight">Bogenrondo</span> kehren die Couplets ebenfalls zurück – aber in umgekehrter Reihenfolge. Das Muster lautet: <em>A – B – A – C – A – B – A</em>. Das Stück spiegelt sich sozusagen um die Mitte.</p>
+        <p>Das Rondo ist eine sehr alte musikalische Form. Es entstand in der Zeit des Barock und der Klassik und wurde von vielen berühmten Komponisten verwendet – zum Beispiel von <span class="highlight">Marc-Antoine Charpentier</span>, <span class="highlight">Wolfgang Amadeus Mozart</span> oder <span class="highlight">Ludwig van Beethoven</span>.</p>
+        <p>Rondos findet man nicht nur in der Klassik. Auch in modernen Liedern gibt es oft einen ähnlichen Aufbau: Ein Refrain, der immer wiederkehrt, und Strophen, die sich verändern – das erinnert stark an das Prinzip des Rondos.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TEIL 2: LÜCKENTEXT ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <span class="section-title">Lückentext: Ergänze die fehlenden Wörter</span>
+    </div>
+    <div class="section-body">
+      <p style="font-family:'DM Sans',sans-serif; font-size:0.85rem; color:#888; margin-bottom:16px;">
+        👆 Tippe zuerst auf ein Wort in der Wortbank, dann auf die passende Lücke – oder umgekehrt.
+      </p>
+      <div class="wordbank">
+        <div class="wordbank-label">Wortbank</div>
+        <div class="wordbank-chips" id="wordbank-chips"></div>
+      </div>
+      <div class="lueckentext-text" id="lueckentext">
+        Das <input class="blank-input" id="b1" data-answer="Rondo" placeholder="________" readonly>
+        ist eine besondere musikalische Form.
+        Es wechselt sich ein <input class="blank-input" id="b2" data-answer="Refrain" placeholder="________" readonly>,
+        der immer gleich ist, mit unterschiedlichen <input class="blank-input" id="b3" data-answer="Couplets" placeholder="________" readonly> (Zwischenteile) ab.
+        Das Grundprinzip lautet: <input class="blank-input" id="b4" data-answer="Refrain" placeholder="________" readonly> –
+        Couplet – <input class="blank-input" id="b5" data-answer="Refrain" placeholder="________" readonly> – Couplet –
+        <input class="blank-input" id="b6" data-answer="Refrain" placeholder="________" readonly>.
+        Beim <input class="blank-input" id="b7" data-answer="Kettenrondo" placeholder="________" readonly>
+        wechseln sich Refrain und immer neue Couplets ab (A – B – A – C – A …).
+        Beim <input class="blank-input" id="b8" data-answer="Bogenrondo" placeholder="________" readonly>
+        spiegelt sich der Aufbau um die Mitte (A – B – A – C – A – B – A).
+        Ein Rondo ist eine <input class="blank-input" id="b9" data-answer="musikalische Form" placeholder="________________" readonly>,
+        bei der ein <input class="blank-input" id="b10" data-answer="Refrain" placeholder="________" readonly> regelmäßig wiederkehrt.
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-check" onclick="checkLueckentext()">✓ Überprüfen</button>
+        <button class="btn btn-ghost" onclick="resetLueckentext()">↺ Zurücksetzen</button>
+      </div>
+      <div class="check-result" id="luecken-result"></div>
+    </div>
+  </div>
+
+  <!-- ══ TEIL 3: RONDO BAUKASTEN ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <span class="section-title">Rondo-Baukasten: Baue dein eigenes Rondo</span>
+    </div>
+    <div class="section-body">
+
+      <!-- Legende einmal oben -->
+      <div class="rondo-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--refrain)">A</div><span>Refrain (immer gleich)</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--couplet-a)">B</div><span>Couplet 1</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--couplet-b)">C</div><span>Couplet 2</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--couplet-c)">D</div><span>Couplet 3 (nur Kettenrondo)</span></div>
+      </div>
+
+      <!-- 3a: KETTENRONDO -->
+      <div id="kette-section">
+        <div style="background:#fff8e0; border:1.5px solid var(--gold); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-family:'DM Sans',sans-serif; font-size:0.9rem;">
+          <strong>🔗 Kettenrondo:</strong> Baue das Muster <strong>A – B – A – C – A – D – A</strong><br>
+          Tippe einen Kreis an, dann tippe ins Feld. Tippe auf einen platzierten Kreis, um ihn zu entfernen.
+        </div>
+        <div class="rondo-palette">
+          <div class="palette-label">Wähle einen Baustein:</div>
+          <div class="palette-circles">
+            <div class="palette-circle" style="background:var(--refrain)" onclick="selectPiece('A','kette')" id="kette-A">A</div>
+            <div class="palette-circle" style="background:var(--couplet-a)" onclick="selectPiece('B','kette')" id="kette-B">B</div>
+            <div class="palette-circle" style="background:var(--couplet-b)" onclick="selectPiece('C','kette')" id="kette-C">C</div>
+            <div class="palette-circle" style="background:var(--couplet-c)" onclick="selectPiece('D','kette')" id="kette-D">D</div>
+          </div>
+        </div>
+        <div class="rondo-drop-area" id="kette-drop" onclick="placePiece('kette')">
+          <span class="drop-placeholder" id="kette-placeholder">Hier tippen zum Platzieren</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-check" onclick="checkRondo('kette')">✓ Überprüfen</button>
+          <button class="btn btn-ghost" onclick="clearRondo('kette')">✕ Leeren</button>
+        </div>
+        <div class="rondo-feedback" id="kette-feedback"></div>
+      </div>
+
+      <!-- Trennlinie -->
+      <hr style="border:none; border-top:2px solid var(--border); margin:28px 0;">
+
+      <!-- 3b: BOGENRONDO -->
+      <div id="bogen-section" style="margin-top:0;">
+        <div style="background:#fff8e0; border:1.5px solid var(--gold); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-family:'DM Sans',sans-serif; font-size:0.9rem;">
+          <strong>🎯 Bogenrondo:</strong> Baue das Muster <strong>A – B – A – C – A – B – A</strong><br>
+          Beachte: Die Couplets kehren in umgekehrter Reihenfolge zurück!
+        </div>
+        <div class="rondo-palette">
+          <div class="palette-label">Wähle einen Baustein:</div>
+          <div class="palette-circles">
+            <div class="palette-circle" style="background:var(--refrain)" onclick="selectPiece('A','bogen')" id="bogen-A">A</div>
+            <div class="palette-circle" style="background:var(--couplet-a)" onclick="selectPiece('B','bogen')" id="bogen-B">B</div>
+            <div class="palette-circle" style="background:var(--couplet-b)" onclick="selectPiece('C','bogen')" id="bogen-C">C</div>
+          </div>
+        </div>
+        <div class="rondo-drop-area" id="bogen-drop" onclick="placePiece('bogen')">
+          <span class="drop-placeholder" id="bogen-placeholder">Hier tippen zum Platzieren</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-check" onclick="checkRondo('bogen')">✓ Überprüfen</button>
+          <button class="btn btn-ghost" onclick="clearRondo('bogen')">✕ Leeren</button>
+        </div>
+        <div class="rondo-feedback" id="bogen-feedback"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ TEIL 4: EUROVISION INFOTEXT ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <span class="section-title">Das bekannteste Rondo der Welt</span>
+    </div>
+    <div class="section-body">
+      <div class="eurosong">
+        <h3>Die Eurovisionshymne – „Te Deum" von Marc-Antoine Charpentier</h3>
+        <p>Schon seit Jahrzehnten erklingt zu Beginn jeder <span class="highlight">Eurovision Song Contest</span>-Sendung dieselbe feierliche Melodie. Doch wer hat diese Musik eigentlich geschrieben – und wann?</p>
+        <p>Der Komponist <span class="highlight">Marc-Antoine Charpentier</span> lebte von 1643 bis 1704 in Frankreich. Er arbeitete am Königshof von <span class="highlight">Ludwig XIV.</span> und war Hofkomponist. Um das Jahr 1692 schrieb er ein großes religiöses Werk für Chor und Orchester: das <span class="highlight">„Te Deum"</span>, ein lateinisches Kirchenlied zum Lob Gottes.</p>
+        <p>Das „Te Deum" ist nach dem Rondo-Prinzip aufgebaut: Eine feierliche Einleitungsmelodie – der Refrain – kehrt immer wieder zurück, während dazwischen verschiedene Abschnitte erklingen.</p>
+        <p>Lange Zeit wurde das Stück fast vergessen. Doch im Jahr <span class="highlight">1954</span> suchte die Europäische Rundfunkunion (EBU) eine Melodie als Erkennungszeichen für ihre neuen Fernsehübertragungen. Man entschied sich für den Beginn von Charpentiers „Te Deum" – und seitdem ist diese Melodie als <span class="highlight">„Europafanfare"</span> weltberühmt.</p>
+        <p>Heute ertönt die Melodie nicht nur beim Eurovision Song Contest, sondern auch bei anderen großen europäischen Fernsehproduktionen. Für Millionen von Menschen in ganz Europa ist sie der Klang von Gemeinschaft und Zusammengehörigkeit – eine über 300 Jahre alte Melodie, die heute noch aktuell ist.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TEIL 5: HÖRAUFGABE & LÜCKENTEXT ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <span class="section-title">Höraufgabe: Die Eurovisionshymne</span>
+    </div>
+    <div class="section-body">
+
+      <!-- Video-Link -->
+      <a class="video-box" href="https://www.youtube.com/watch?v=iwU37osOkQA" target="_blank" rel="noopener">
+        <div class="video-icon">▶️</div>
+        <div class="video-text">
+          <strong>Jetzt anhören: „Te Deum" – Die Eurovisionshymne</strong>
+          <span>youtube.com · Marc-Antoine Charpentier · Präludium aus dem Te Deum</span>
+        </div>
+      </a>
+
+      <!-- Aufgabe 1: Ausdruckscharakter -->
+      <div class="task-box">
+        <h4>🎧 Aufgabe A – Ausdruckscharakter</h4>
+        <p>Höre dir die Musik an. Wie klingt sie? Tippe alle passenden Wörter an:</p>
+        <div class="charakter-chips" id="charakter-chips">
+          <span class="char-chip" onclick="toggleChar(this,'festlich')">festlich</span>
+          <span class="char-chip" onclick="toggleChar(this,'feierlich')">feierlich</span>
+          <span class="char-chip" onclick="toggleChar(this,'traurig')">traurig</span>
+          <span class="char-chip" onclick="toggleChar(this,'majestätisch')">majestätisch</span>
+          <span class="char-chip" onclick="toggleChar(this,'leise')">leise</span>
+          <span class="char-chip" onclick="toggleChar(this,'fröhlich')">fröhlich</span>
+          <span class="char-chip" onclick="toggleChar(this,'kraftvoll')">kraftvoll</span>
+          <span class="char-chip" onclick="toggleChar(this,'traurig')">langweilig</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-check" onclick="checkCharakter()">✓ Überprüfen</button>
+          <button class="btn btn-ghost" onclick="resetCharakter()">↺ Zurücksetzen</button>
+        </div>
+        <div class="char-result" id="char-result"></div>
+      </div>
+
+      <!-- Aufgabe 2: Lückentext Charpentier -->
+      <div class="subsection-title">📝 Aufgabe B – Lückentext zum „Te Deum"</div>
+      <p style="font-family:'DM Sans',sans-serif; font-size:0.85rem; color:#888; margin-bottom:14px;">
+        Ergänze die drei Sätze mit den richtigen Wörtern aus der Wortbank.
+      </p>
+      <div class="wordbank">
+        <div class="wordbank-label">Wortbank</div>
+        <div class="wordbank-chips" id="euro-chips"></div>
+      </div>
+      <div class="lueckentext-text" id="euro-lueckentext">
+        Marc-Antoine Charpentier lebte von 1643 bis 1704 in
+        <input class="blank-input euro-blank" id="e1" data-answer="Frankreich" placeholder="________" readonly>
+        und schrieb um das Jahr
+        <input class="blank-input euro-blank" id="e2" data-answer="1692" placeholder="____" style="min-width:60px" readonly>
+        das Werk „Te Deum" für <input class="blank-input euro-blank" id="e3" data-answer="Chor und Orchester" placeholder="________________" readonly>.
+        Das „Te Deum" ist nach dem
+        <input class="blank-input euro-blank" id="e4" data-answer="Rondo" placeholder="________" readonly>-Prinzip aufgebaut,
+        bei dem ein <input class="blank-input euro-blank" id="e5" data-answer="Refrain" placeholder="________" readonly>
+        immer wieder zurückkehrt.
+        Seit <input class="blank-input euro-blank" id="e6" data-answer="1954" placeholder="____" style="min-width:60px" readonly>
+        erklingt das Stück als <input class="blank-input euro-blank" id="e7" data-answer="Europafanfare" placeholder="____________" readonly>
+        zu Beginn des <input class="blank-input euro-blank" id="e8" data-answer="Eurovision Song Contest" placeholder="____________________" readonly>.
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-check" onclick="checkEuroLuecken()">✓ Überprüfen</button>
+        <button class="btn btn-ghost" onclick="resetEuroLuecken()">↺ Zurücksetzen</button>
+      </div>
+      <div class="check-result" id="euro-result"></div>
+
+      <!-- Aufgabe 3: Struktur des Te Deum bauen -->
+      <div class="subsection-title">🎼 Aufgabe C – Struktur des „Te Deum" als Rondo</div>
+      <div class="task-box">
+        <h4>📌 Hinweis</h4>
+        <p>Der erste Refrain wird am Anfang <strong>zweimal hintereinander</strong> gespielt, bevor die Couplets einsetzen.</p>
+        <p>🎧 Höre dir das Beispiel noch einmal an und baue dann die Struktur selbst zusammen!</p>
+      </div>
+      <div class="rondo-legend" style="margin-bottom:16px;">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--refrain)">A</div><span>Refrain / Einleitungsmelodie</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--couplet-a)">B</div><span>Couplet 1</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--couplet-b)">C</div><span>Couplet 2</span></div>
+      </div>
+      <div class="rondo-palette">
+        <div class="palette-label">Wähle einen Baustein:</div>
+        <div class="palette-circles">
+          <div class="palette-circle" style="background:var(--refrain)" onclick="selectPiece('A','euro')" id="euro-A">A</div>
+          <div class="palette-circle" style="background:var(--couplet-a)" onclick="selectPiece('B','euro')" id="euro-B">B</div>
+          <div class="palette-circle" style="background:var(--couplet-b)" onclick="selectPiece('C','euro')" id="euro-C">C</div>
+        </div>
+      </div>
+      <div class="rondo-drop-area" id="euro-drop" onclick="placePiece('euro')">
+        <span class="drop-placeholder" id="euro-placeholder">Hier tippen zum Platzieren</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-check" onclick="checkRondo('euro')">✓ Überprüfen</button>
+        <button class="btn btn-ghost" onclick="clearRondo('euro')">✕ Leeren</button>
+      </div>
+      <div class="rondo-feedback" id="euro-feedback"></div>
+
+    </div>
+  </div>
+
+  <!-- ══ TEIL 6: ABSCHLIESSEN & PDF ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <span class="section-title">Abschließen &amp; Als PDF speichern</span>
+    </div>
+    <div class="section-body">
+      <p style="font-family:'DM Sans',sans-serif; font-size:0.95rem; margin-bottom:18px;">
+        Wenn du alle Aufgaben fertig bearbeitet hast, überprüfe alles auf einmal und speichere dein Arbeitsblatt als PDF.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-check" onclick="checkAll()">✓ Alles überprüfen</button>
+        <button class="btn btn-pdf" onclick="savePDF()">📄 Als PDF speichern</button>
+      </div>
+      <div class="check-result" id="all-result"></div>
+    </div>
+  </div>
+
+</main>
+</div><!-- end #printable -->
+
+<script>
+// ══════════════════════════════
+// HILFSFUNKTIONEN
+// ══════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+// ══════════════════════════════
+// LÜCKENTEXT 1 (allgemein)
+// ══════════════════════════════
+const WORDS1 = ['Rondo','Refrain','Couplets','Kettenrondo','Bogenrondo','musikalische Form'];
+let sel1Chip = null, sel1Blank = null;
+
+function initWordbank() {
+  const container = document.getElementById('wordbank-chips');
+  container.innerHTML = '';
+  shuffle(WORDS1).forEach(word => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = word;
+    chip.dataset.word = word;
+    chip.addEventListener('click', () => onChipClick1(chip, word));
+    container.appendChild(chip);
+  });
+}
+
+function onChipClick1(chip, word) {
+  if (sel1Blank) { fillBlank1(sel1Blank, word, chip); return; }
+  document.querySelectorAll('#wordbank-chips .chip').forEach(c => c.classList.remove('selected'));
+  if (sel1Chip === chip) { sel1Chip = null; return; }
+  chip.classList.add('selected');
+  sel1Chip = chip;
+}
+
+function onBlankClick1(blank) {
+  if (sel1Chip) { fillBlank1(blank, sel1Chip.dataset.word, sel1Chip); return; }
+  document.querySelectorAll('#lueckentext .blank-input').forEach(b => b.classList.remove('focused-blank'));
+  if (sel1Blank === blank) { sel1Blank = null; return; }
+  blank.classList.add('focused-blank');
+  sel1Blank = blank;
+}
+
+function fillBlank1(blank, word, chip) {
+  if (blank.dataset.filledWord) {
+    const pw = blank.dataset.filledWord;
+    recheckUsed1(pw);
+  }
+  blank.value = word;
+  blank.dataset.filledWord = word;
+  blank.style.minWidth = (word.length*10+24)+'px';
+  blank.classList.remove('correct','wrong','focused-blank');
+  recheckUsed1(word);
+  document.querySelectorAll('#wordbank-chips .chip').forEach(c => c.classList.remove('selected'));
+  sel1Chip = null; sel1Blank = null;
+}
+
+function recheckUsed1(word) {
+  const allBlanks = document.querySelectorAll('#lueckentext .blank-input');
+  const needed = [...allBlanks].filter(b => b.dataset.answer === word).length;
+  const filled = [...allBlanks].filter(b => b.dataset.filledWord === word).length;
+  document.querySelectorAll(`#wordbank-chips .chip`).forEach(c => {
+    if (c.dataset.word === word) c.classList.toggle('used', filled >= needed);
+  });
+}
+
+function checkLueckentext() {
+  const blanks = document.querySelectorAll('#lueckentext .blank-input');
+  let ok=0, tot=0;
+  blanks.forEach(b => {
+    tot++;
+    if ((b.value||'').toLowerCase().trim() === b.dataset.answer.toLowerCase().trim()) {
+      b.classList.add('correct'); b.classList.remove('wrong'); ok++;
+    } else { b.classList.add('wrong'); b.classList.remove('correct'); }
+  });
+  const res = document.getElementById('luecken-result');
+  res.classList.add('visible');
+  if (ok===tot) { res.className='check-result visible all-correct'; res.innerHTML='✓ Alle '+tot+' Lücken richtig! Sehr gut!'; }
+  else { res.className='check-result visible has-errors'; res.innerHTML=ok+' von '+tot+' Lücken richtig. Die rot markierten Felder noch einmal prüfen.'; }
+}
+
+function resetLueckentext() {
+  document.querySelectorAll('#lueckentext .blank-input').forEach(b => {
+    b.value=''; b.dataset.filledWord='';
+    b.classList.remove('correct','wrong','focused-blank');
+    b.style.minWidth='120px';
+  });
+  document.querySelectorAll('#wordbank-chips .chip').forEach(c => c.classList.remove('used','selected'));
+  document.getElementById('luecken-result').className='check-result';
+  sel1Chip=null; sel1Blank=null;
+}
+
+// ══════════════════════════════
+// RONDO BAUKASTEN (kette/bogen/euro)
+// ══════════════════════════════
+const RONDO_COLORS = { A:'var(--refrain)', B:'var(--couplet-a)', C:'var(--couplet-b)', D:'var(--couplet-c)' };
+const RONDO_CORRECT = {
+  kette: ['A','B','A','C','A','D','A'],
+  bogen: ['A','B','A','C','A','B','A'],
+  euro:  ['A','A','B','A','C','A']
+};
+
+let selectedPiece = { kette:null, bogen:null, euro:null };
+let placedPieces  = { kette:[],   bogen:[],   euro:[] };
+
+
+
+function selectPiece(letter, type) {
+  ['A','B','C','D'].forEach(l => {
+    const el = document.getElementById(type+'-'+l);
+    if (el) el.classList.remove('selected-piece');
+  });
+  if (selectedPiece[type]===letter) { selectedPiece[type]=null; return; }
+  selectedPiece[type]=letter;
+  const el=document.getElementById(type+'-'+letter);
+  if(el) el.classList.add('selected-piece');
+}
+
+function placePiece(type) {
+  const letter = selectedPiece[type];
+  if (!letter) return;
+  placedPieces[type].push(letter);
+  renderDropArea(type);
+  document.getElementById(type+'-feedback').className='rondo-feedback';
+}
+
+function removePiece(type, index) {
+  placedPieces[type].splice(index,1);
+  renderDropArea(type);
+}
+
+function renderDropArea(type) {
+  const area = document.getElementById(type+'-drop');
+  const placeholder = document.getElementById(type+'-placeholder');
+  const pieces = placedPieces[type];
+  area.querySelectorAll('.placed-circle,.arrow-sep').forEach(el=>el.remove());
+  placeholder.style.display = pieces.length===0 ? 'block' : 'none';
+  pieces.forEach((letter, i) => {
+    if (i>0) {
+      const arrow = document.createElement('span');
+      arrow.className='arrow-sep'; arrow.textContent='→';
+      area.appendChild(arrow);
+    }
+    const circle = document.createElement('div');
+    circle.className='placed-circle';
+    circle.style.background=RONDO_COLORS[letter];
+    circle.textContent=letter;
+    circle.title='Tippen zum Entfernen';
+    const rm=document.createElement('span');
+    rm.className='remove-btn'; rm.textContent='×';
+    rm.addEventListener('click',e=>{e.stopPropagation();removePiece(type,i);});
+    circle.appendChild(rm);
+    circle.addEventListener('click',e=>{removePiece(type,i);});
+    area.appendChild(circle);
+  });
+}
+
+function checkRondo(type) {
+  const correct = RONDO_CORRECT[type];
+  const placed = placedPieces[type];
+  const fb = document.getElementById(type+'-feedback');
+  if (placed.length===0) { fb.className='rondo-feedback hint'; fb.textContent='Platziere zuerst die Bausteine!'; return; }
+  if (placed.length < correct.length) {
+    fb.className='rondo-feedback hint';
+    fb.textContent='Noch nicht fertig! Du hast '+placed.length+' von '+correct.length+' Teilen platziert.';
+    return;
+  }
+  const ok = placed.length===correct.length && JSON.stringify(placed)===JSON.stringify(correct);
+  if (ok) {
+    fb.className='rondo-feedback correct';
+    fb.textContent='✓ Perfekt! Das Muster '+correct.join(' – ')+' stimmt genau! 🎉';
+  } else {
+    fb.className='rondo-feedback wrong';
+    fb.textContent='Noch nicht ganz richtig. Das gesuchte Muster lautet: '+correct.join(' – ')+'.';
+  }
+}
+
+function clearRondo(type) {
+  placedPieces[type]=[];
+  renderDropArea(type);
+  document.getElementById(type+'-feedback').className='rondo-feedback';
+  ['A','B','C','D'].forEach(l=>{
+    const el=document.getElementById(type+'-'+l);
+    if(el) el.classList.remove('selected-piece');
+  });
+  selectedPiece[type]=null;
+}
+
+// ══════════════════════════════
+// AUSDRUCKSCHARAKTER
+// ══════════════════════════════
+const CORRECT_CHARS = ['festlich','feierlich','majestätisch','kraftvoll'];
+
+function toggleChar(chip, word) {
+  chip.classList.toggle('selected-char');
+}
+
+function checkCharakter() {
+  const selected = [...document.querySelectorAll('.char-chip.selected-char')].map(c=>c.textContent.toLowerCase());
+  const correctHit = CORRECT_CHARS.filter(w=>selected.includes(w));
+  const wrongHit = selected.filter(w=>!CORRECT_CHARS.includes(w));
+  const res = document.getElementById('char-result');
+  res.classList.add('visible');
+  if (wrongHit.length===0 && correctHit.length>=2) {
+    res.className='char-result visible correct';
+    res.innerHTML='✓ Gut erkannt! Die Musik klingt <strong>festlich, feierlich, majestätisch und kraftvoll</strong>.';
+  } else {
+    res.className='char-result visible partial';
+    res.innerHTML='Teilweise richtig. Achte darauf, nur passende Begriffe zu wählen. Tipp: Wie klingt ein feierlicher Aufzug?';
+  }
+}
+
+function resetCharakter() {
+  document.querySelectorAll('.char-chip').forEach(c=>c.classList.remove('selected-char'));
+  document.getElementById('char-result').className='char-result';
+}
+
+// ══════════════════════════════
+// EURO LÜCKENTEXT
+// ══════════════════════════════
+const EURO_WORDS = ['Frankreich','1692','Chor und Orchester','Rondo','Refrain','1954','Europafanfare','Eurovision Song Contest'];
+let selEChip=null, selEBlank=null;
+
+function initEuroWordbank() {
+  const container=document.getElementById('euro-chips');
+  container.innerHTML='';
+  shuffle(EURO_WORDS).forEach(word=>{
+    const chip=document.createElement('span');
+    chip.className='chip';
+    chip.textContent=word;
+    chip.dataset.word=word;
+    chip.addEventListener('click',()=>onEChipClick(chip,word));
+    container.appendChild(chip);
+  });
+}
+
+function onEChipClick(chip,word) {
+  if(selEBlank){fillEBlank(selEBlank,word,chip);return;}
+  document.querySelectorAll('#euro-chips .chip').forEach(c=>c.classList.remove('selected'));
+  if(selEChip===chip){selEChip=null;return;}
+  chip.classList.add('selected'); selEChip=chip;
+}
+
+function onEBlankClick(blank) {
+  if(selEChip){fillEBlank(blank,selEChip.dataset.word,selEChip);return;}
+  document.querySelectorAll('.euro-blank').forEach(b=>b.classList.remove('focused-blank'));
+  if(selEBlank===blank){selEBlank=null;return;}
+  blank.classList.add('focused-blank'); selEBlank=blank;
+}
+
+function fillEBlank(blank,word,chip) {
+  if(blank.dataset.filledWord) recheckEUsed(blank.dataset.filledWord);
+  blank.value=word; blank.dataset.filledWord=word;
+  blank.style.minWidth=(word.length*10+24)+'px';
+  blank.classList.remove('correct','wrong','focused-blank');
+  recheckEUsed(word);
+  document.querySelectorAll('#euro-chips .chip').forEach(c=>c.classList.remove('selected'));
+  selEChip=null; selEBlank=null;
+}
+
+function recheckEUsed(word) {
+  const allB=document.querySelectorAll('.euro-blank');
+  const needed=[...allB].filter(b=>b.dataset.answer===word).length;
+  const filled=[...allB].filter(b=>b.dataset.filledWord===word).length;
+  document.querySelectorAll('#euro-chips .chip').forEach(c=>{
+    if(c.dataset.word===word) c.classList.toggle('used',filled>=needed);
+  });
+}
+
+function checkEuroLuecken() {
+  const blanks=document.querySelectorAll('.euro-blank');
+  let ok=0,tot=0;
+  blanks.forEach(b=>{
+    tot++;
+    if((b.value||'').toLowerCase().trim()===b.dataset.answer.toLowerCase().trim()){
+      b.classList.add('correct');b.classList.remove('wrong');ok++;
+    } else {b.classList.add('wrong');b.classList.remove('correct');}
+  });
+  const res=document.getElementById('euro-result');
+  res.classList.add('visible');
+  if(ok===tot){res.className='check-result visible all-correct';res.innerHTML='✓ Alle '+tot+' Lücken richtig!';}
+  else{res.className='check-result visible has-errors';res.innerHTML=ok+' von '+tot+' Lücken richtig. Die rot markierten Felder noch einmal prüfen.';}
+}
+
+function resetEuroLuecken() {
+  document.querySelectorAll('.euro-blank').forEach(b=>{
+    b.value='';b.dataset.filledWord='';
+    b.classList.remove('correct','wrong','focused-blank');
+    b.style.minWidth='120px';
+  });
+  document.querySelectorAll('#euro-chips .chip').forEach(c=>c.classList.remove('used','selected'));
+  document.getElementById('euro-result').className='check-result';
+  selEChip=null; selEBlank=null;
+}
+
+// ══════════════════════════════
+// GESAMTCHECK
+// ══════════════════════════════
+function checkAll() {
+  checkLueckentext();
+  checkRondo('kette');
+  checkRondo('bogen');
+  checkCharakter();
+  checkEuroLuecken();
+  checkRondo('euro');
+
+  const lOk = [...document.querySelectorAll('#lueckentext .blank-input')].every(b=>b.classList.contains('correct'));
+  const kOk = document.getElementById('kette-feedback').classList.contains('correct');
+  const bOk = document.getElementById('bogen-feedback').classList.contains('correct');
+  const eOk = [...document.querySelectorAll('.euro-blank')].every(b=>b.classList.contains('correct'));
+  const euroROk = document.getElementById('euro-feedback').classList.contains('correct');
+
+  const res=document.getElementById('all-result');
+  res.classList.add('visible');
+  const issues=[];
+  if(!lOk) issues.push('Lückentext (Teil 2)');
+  if(!kOk) issues.push('Kettenrondo (Teil 3)');
+  if(!bOk) issues.push('Bogenrondo (Teil 3)');
+  if(!eOk) issues.push('Lückentext Charpentier (Teil 5B)');
+  if(!euroROk) issues.push('Struktur Te Deum (Teil 5C)');
+
+  if(issues.length===0){
+    res.className='check-result visible all-correct';
+    res.innerHTML='🎉 Alle Aufgaben richtig! Jetzt als PDF speichern.';
+  } else {
+    res.className='check-result visible has-errors';
+    res.innerHTML='Noch Fehler in: <strong>'+issues.join(', ')+'</strong>. Bitte korrigieren.';
+  }
+}
+
+// ══════════════════════════════
+// PDF SPEICHERN
+// ══════════════════════════════
+function savePDF() {
+  function loadScript(src, cb) {
+    if (document.querySelector('script[src="'+src+'"]')) { cb(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = cb;
+    s.onerror = () => { alert('Netzwerkfehler – bitte Verbindung prüfen.'); overlay.classList.remove('visible'); };
+    document.head.appendChild(s);
+  }
+
+  const overlay = document.getElementById('pdf-overlay');
+  const msg = document.getElementById('pdf-msg');
+  overlay.classList.add('visible');
+  msg.textContent = 'Wird vorbereitet …';
+
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', () => {
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', () => {
+      msg.textContent = 'PDF wird erstellt …';
+
+      const hideEls = document.querySelectorAll('.btn-row, .wordbank, .charakter-chips, .rondo-palette, .video-box');
+      hideEls.forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.remove-btn').forEach(el => el.style.display = 'none');
+      document.body.style.background = '#fff';
+
+      html2canvas(document.getElementById('printable'), {
+        scale: 1.5,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        windowWidth: 860
+      }).then(canvas => {
+        hideEls.forEach(el => el.style.display = '');
+        document.querySelectorAll('.remove-btn').forEach(el => el.style.display = '');
+        document.body.style.background = '';
+
+        const { jsPDF } = window.jspdf;
+        const imgData = canvas.toDataURL('image/jpeg', 0.9);
+
+        // Create PDF with exact canvas proportions (scrollable single page)
+        const pxW = canvas.width;
+        const pxH = canvas.height;
+        const mmW = 210; // A4 width
+        const mmH = Math.ceil(pxH * mmW / pxW); // proportional height
+
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [mmW, mmH] });
+        pdf.addImage(imgData, 'JPEG', 0, 0, mmW, mmH);
+        pdf.save('Das_Rondo_Arbeitsblatt.pdf');
+        overlay.classList.remove('visible');
+
+      }).catch(err => {
+        hideEls.forEach(el => el.style.display = '');
+        document.querySelectorAll('.remove-btn').forEach(el => el.style.display = '');
+        document.body.style.background = '';
+        overlay.classList.remove('visible');
+        alert('Fehler: ' + err.message);
+      });
+    });
+  });
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  initWordbank();
+  initEuroWordbank();
+  document.querySelectorAll('#lueckentext .blank-input').forEach(b => {
+    b.addEventListener('click', () => onBlankClick1(b));
+  });
+  document.querySelectorAll('.euro-blank').forEach(b => {
+    b.addEventListener('click', () => onEBlankClick(b));
+  });
+});
+</script>
+</body>
+</html>
